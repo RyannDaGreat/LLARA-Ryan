@@ -9,6 +9,10 @@ import numpy as np
 
 url = "http://130.245.125.22:30000/chat"  # Replace with your server URL
 
+img_w = 640
+img_h = 320
+y_offset = 80 # crop for vima
+
 # TEST
 questions = [
     "Could you write down what needs to be done to complete the task on this scene?",
@@ -58,10 +62,6 @@ def prepare_prompt(p:str) -> str:
     
     return '\n'.join(['<image>', task_prompt, user_prompt, format_prompt])
 
-img_w = 640
-img_h = 320
-
-y_offset = 80 # crop for vima
 
 def parse_coor(s: str):
     # remove ( )
@@ -126,4 +126,3 @@ if __name__ == '__main__':
         frame = cv2.circle(frame, place, 3, (0, 255, 0), 2)
 
     rp.display_image(frame,1)
-    
