@@ -7,11 +7,14 @@ from io import BytesIO
 import cv2
 import numpy as np
 
+import fire
+
 url = "http://130.245.125.22:30000/chat"  # Replace with your server URL
 
 img_w = 640
 img_h = 320
-y_offset = 80 # crop for vima
+# y_offset = 80 # crop for vima
+y_offset = 0 # crop for vima
 
 # TEST
 questions = [
@@ -91,12 +94,17 @@ def get_vima_img(img):
     return img
 
 
-def main():
+def run_llara(
+    img='/Users/ryan/Downloads/12_last.png',
+    task_prompt="Put the object on top of another object.",
+):
+    """This is one of the critical functions."""
     action_queue = []
-    task_prompt = 'Put the object on top of another object.'
+    # task_prompt = 'Put the object on top of another object.'
     prompts_to_vlm = prepare_prompt(task_prompt)
     
-    vima_img = Image.open('/Users/ryan/Downloads/12_last.png').crop((0, y_offset, 640, 320 + y_offset))
+    # vima_img = Image.open('/Users/ryan/Downloads/12_last.png').crop((0, y_offset, 640, 320 + y_offset))
+    vima_img=get_vima_img(img)
     ans = image_qa(image=vima_img, question=prompts_to_vlm)
     
     str_actions = re.findall(f'\(.+?,.+?\)', ans)
@@ -119,7 +127,7 @@ def main():
 
     frame = np.array(vima_img)
     if pick and place:
-        frame = cv2.line(frame, pick, place, (0, 0, 255), 1)
+        frame = cv2.arrowedLine(frame, pick, place, (0, 0, 255), 1)
     if pick:
         frame = cv2.circle(frame, pick, 3, (255, 0, 0), 2)
     if place:
@@ -129,5 +137,54 @@ def main():
 
     return rp.gather_vars('frame pick place prompts_to_vlm')
 
+def demo():
+    input_images = [
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/1_last.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/3_last.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/4_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/7_last.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/9_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/10_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/12_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/15_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/18_last.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/18_first.png',
+        '/Users/ryan/Downloads/_xArm-VIMA/iclr_rebuttal_episodes_dinbcauxc_ftxarmact_task1/19_first.png',
+    ]
+
+
+    task_prompts=[
+        'Put the small thing in the pan',
+        'Put the small thing in the plate',
+        'Put the small thing in the dish',
+        'grab the small object and put it in the pan',
+        'grab the small object and put it in the plate',
+        'grab the small object and put it in the dish',
+        'move the small object into the pan',
+        'move the small object into the plate',
+        'move the small object into the dish',
+    ]
+
+    grid=[]
+
+    input_images=rp.shuffled(input_images)
+    task_prompts=rp.shuffled(task_prompts)
+    
+    for task_prompt in rp.eta(task_prompts, title='task_prompt'):
+        for input_image in rp.eta(input_images, title='input_image'):
+            output = run_llara(input_image,task_prompt)
+            rp.display_image(output.frame)
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
-    main()
+    demo()
+    # fire.Fire()
+    # output=main('/Users/ryan/Downloads/12_last.png','Put the yellow corn on the brown thing')
+    # rp.display_image(output.frame,1)
