@@ -91,7 +91,7 @@ def get_vima_img(img):
     return img
 
 
-if __name__ == '__main__':
+def main():
     action_queue = []
     task_prompt = 'Put the object on top of another object.'
     prompts_to_vlm = prepare_prompt(task_prompt)
@@ -125,4 +125,9 @@ if __name__ == '__main__':
     if place:
         frame = cv2.circle(frame, place, 3, (0, 255, 0), 2)
 
-    rp.display_image(frame,1)
+    # rp.display_image(frame,1)
+
+    return rp.gather_vars('frame pick place prompts_to_vlm')
+
+if __name__ == '__main__':
+    main()
