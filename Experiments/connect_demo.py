@@ -82,6 +82,15 @@ def action_to_text(action: dict) -> str:
     return f'Pick up the object at <b>({px / w :.3f}, {py / h: .3f})</b>, rotate <r>[{-rotation}]</r> degrees, and drop it at <b>({tx / w :.3f}, {ty / h :.3f})</b>.'
         
 
+def get_vima_img(img):
+    if isinstance(img,str):
+        img = rp.load_image(img)
+    img=rp.resize_image_to_hold(img,height=320,width=640)
+    img=rp.crop_image(img,height=320,width=640,origin='center')
+    img = rp.as_pil_image(rp.as_byte_image(rp.as_rgb_image(img)))
+    return img
+
+
 if __name__ == '__main__':
     action_queue = []
     task_prompt = 'Put the object on top of another object.'
